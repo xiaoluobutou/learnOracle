@@ -1,0 +1,60 @@
+#create procedure
+Create [or replace] procedure <prcdName>
+[(<prmName> <prmType> <dataType>
+
+[is | as]
+	[<variable declare>]
+begin 
+	<process>
+end
+
+#execute  procedure in
+[exec | execute]<prcdName>
+([prmName=> [argument | @variable] ])|[argument] )
+
+#execute procedure out
+[exec | execute]<prcdName>
+(<variable>)
+
+#delete procedure
+drop procedure [userName.]<prcdName>
+
+#for example 
+
+	#create procedure
+	create procedure proc
+	as 
+	begin 
+		dbms_output.put_line("hello world");
+	end
+
+	#create procedure in 
+	create procedure totalCredit
+	    (xh IN varchar2)
+	as 
+	  xf number;
+	begin 
+	    select ×tCredit INTO xf
+	    form xsb
+	    where xsb.xh = xh and rownum =1;
+	dbms_output.put_line(xf)
+	end
+
+	#create procedure in out 
+	create or replace procedure cout_grade
+	    (zj IN char,personNum OUT number)
+	as
+	begin 
+	    select count(xh) INTO personNum
+	    from xsb
+	    where major = zy and totalCredit > 50
+	end
+
+	#execute procedure 
+	declare
+	    personNum number
+	begin 	
+	    exec cout_grade('math',personNum)
+	    dbms_output.put_line(personNum)
+	end
+

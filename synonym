@@ -1,0 +1,17 @@
+#create synonym 
+create public synonym <synName> for [userName.]<tableName>
+
+#use synonym 
+select * from <synName>
+
+#delect [public] synonym
+Drop [public] synonym [userName.]<synonymName>
+
+#for example 
+	create public synonym e_s for scott.emp
+
+	#alter switch use synonym 
+ 	select * from e_s
+	#delect synonym
+	drop public synonym e_s
+
