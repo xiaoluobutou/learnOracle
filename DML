@@ -1,0 +1,13 @@
+select * from [table]
+[where express]
+[group by attribute]
+[order by desc | asc]
+
+inseter into <tableName(attribute)> <values('values')>
+
+update <tableName¡> 
+set <attribute = values>
+[where express]
+
+delete table 
+[where express]

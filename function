@@ -1,0 +1,58 @@
+#create function 
+
+create function (<parameterName> <parameterType> <dataType>)
+return <returnType>
+{is | as}
+[declare]
+
+begin 
+    [body]
+    [return (express)]
+
+end 
+
+
+create function max(left number in,right number in)
+
+return number 
+    as max number
+
+begin 
+    if left >= right then
+	max:=left;
+    else
+	max:=right
+    endif
+    return(max);
+end
+
+declare
+    a number:=1;
+    b number:=2;
+begin 
+
+max(a,b)
+end
+
+#while cycle
+while <express>
+loop
+    <body>
+end loop
+
+#for in cycle
+declare
+    countI number;
+for countI in 2..10
+loop
+    <body>
+end loop
+
+#case syntax
+case <variable>
+    when <value_frist> then <body;>
+    when <value_second> then <body;>
+    [else <segment>]
+end case
+
+

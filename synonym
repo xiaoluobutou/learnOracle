@@ -1,10 +1,11 @@
 #create synonym 
 create public synonym <synName> for [userName.]<tableName>
 
+#point to that table,view,procedure,package,squence
 #use synonym 
 select * from <synName>
 
-#delect [public] synonym
+#delete [public] synonym
 Drop [public] synonym [userName.]<synonymName>
 
 #for example 

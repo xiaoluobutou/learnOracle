@@ -1,0 +1,15 @@
+# use cursor
+
+declare 
+    cursor c is select ¡<attributeName> from  <tableName>
+    var_column <tableName>.<attributeName>%type;
+begin 
+    open c;
+    fetch c into var_column;
+    while(c%found)
+    loop
+	dbms_output.putline(var_column);
+	fetch c into var_column;
+    end loop
+    close c;
+end

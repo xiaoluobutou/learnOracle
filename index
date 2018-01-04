@@ -1,0 +1,12 @@
+#create index
+
+create [unique | bitmap] index 
+on <tableName(column)>
+[logging | nologging]
+[compute statistics]
+[compaess | compaess]
+[tablespace]
+[sort | un sort]
+[reverse]
+
+alter index <indexName> reaname to <newName>

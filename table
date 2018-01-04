@@ -1,0 +1,17 @@
+create table(
+
+    #<列名> <数据类型> [default<默认值> [<列约束>]]
+    <attribute name> <type> [<default<defaultValue>] [attribute constraint],
+    
+    #列约束
+    [not]NULL
+    [unique]
+    [primary key]
+    [reference <user Scheme>.<table>.<attribute name>]
+    [check(<expression>)]
+
+    #<表约束>
+    <table constraint>
+)[tablespace <tablespaceName>]
+
+#operate of table 

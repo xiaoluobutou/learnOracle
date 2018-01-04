@@ -1,0 +1,24 @@
+#create sequence 
+
+create sequence <sequenceName> 
+    [increment by <number>]
+    [start with <number>]
+    [maxvalue <number>]
+    [minvalue <number>]
+    [cache <number>|no cache]
+    [cycle | no cycle]
+    [order | no order]
+#alter sequence 
+
+
+alter sequence <sequenceName> 
+    [increment by <number>]
+    [start with <number>]
+    [maxvalue <number>]
+    [minvalue <number>]
+    [cache <number>|no cache]
+    [cycle | no cycle]
+    [order | no order]
+
+#delete sequence 
+drop sequence <sequenceName>

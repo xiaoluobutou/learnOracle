@@ -1,0 +1,77 @@
+
+关闭:
+shutdown normal 不允许新的连接、
+Shutdown transactional  不等待会话结束、
+Shutdown immediate 不等待事务结束、
+Shutdown abort 不做检查点且没有关闭数据文件。启动时自动进行实例恢复。
+
+审计：使用户author的所有更新操作都要被审计
+Audtt update table by author;
+
+
+逻辑备份：
+导出命令行：EXP USERID = SCOTT/Mn123456 FULL=N BUFFER=1000 FILE=F:\SCOTT10.DMP TABLES=EMP
+数据泵导出：
+create directory dpump_dir as ‘f:\bak’;      sql里 
+Grant read,write on directory dpump_dir to <用户名>;
+Expdp scott/Mm123456 dumpfile=emp.dmp directory=dpump_dir tables=emp JOB_name = emp_job      此条为命令行
+
+
+闪回
+set time on;
+select * from aaa as of timestamp
+ to_timestamp('2011-11-29 09:36:48','YYYY-MM-DD HH24:MI:SS');
+
+数据泵 例：使用EXPDP导出SCOTT用户的表XSB
+CREATE DIRECTORY dpump dir as’d:\bak’;
+GRANT READ,WRITE ON DIRECIORY Dpump_DIR TO<用户名>;
+EXPDP SCOTT/Mm 123456 DUMPFILE＝XSB.DMP DIRECTORY＝DRUMP_DIR
+TABLES=XSB JOB_NAME=XSB_JOB 将学生表泵到dump
+（1）查询闪回
+语法格式：to_timestamp（‘timepoint’,‘format’）
+例：使用查询闪回恢复删除的数据。
+①set time on select＊from xsbl;
+②delete from xsbl；commit；
+③select＊from xsbl as of timestamp to_timestamp（ ）;
+④insert into xsbl；
+select＊from xsbl as of timestamp；to_timestamp（）;
+（2）表闪回
+语法格式：flashback table［用户方案名.］<表名>
+  to｛［before drop ［rename to <新表名>］］
+   [scn|timestamp]<表达式>[enable|disable]triggers }
+例：首先创建一个表，然后删除某些数据，在利用flashback table 命令恢复。
+①set time on    create table cjb1      as select*from cjb；
+②delete from cjb1     where 学号=‘151113’;   commit；
+③alter table cjb1 enable row movement ; flashback table cjb1 to timestamp
+to_timestamp（‘2015_7_6 16：54：35’，‘yyyy_mm_dd hh24：mi：ss’）；
+（3）删除闪回
+例：删除闪回的实现。
+①create table t1（t char （10））；②drop table t1；
+③select object_ name, original_ name, type, droptime from recyclebin;
+④flashback table t1 to before drop;
+在回收站中清除表table1：purgetabletable1
+（4）数据库闪回
+语法格式：flashback［standby |database<数据库名> ］
+｛
+  to[scn|timestamp]<表达式>|to before [scn| timestamp]<表达式>
+
+1，写出oracle体系的物理结构及其作用
+（1）数据文件作用：创建后可改变大小
+（2）重做日志文件 作用：当数据库中的数据遭到破坏时，可以用这些日志来恢复数据库
+（3）控制文件作用：为了避免控制文件毁损导致数据库系统停止
+（4）参数作用：定义实例的启动和关闭，记录各种系统参数
+2，写出oracle体系的过程组成及作用
+（1）DBWR  作用：负责将数据块缓存如没变动过的数据块回写至硬盘内
+（2）LGWR  作用：将重做日志缓冲区的数据变动记录，循序写入重做日志文件
+（3）SMOW  作用：oracle数据库不正常关闭下一次激活时由SMOW进行数据库修复动作
+（4）PMON  作用：清除数据库缓存区内不再使用的空间并释放
+（5）CKPT  作用：确保缓冲区内经常变动的数据定期被写入数据文件
+（6）RECO  作用：自动解决在分布式事务中的故障
+（7）ARCH  作用：将归档文件写入磁盘设备
+（8）Lckn  作用：为了避免进程间在数据存入时发生冲突
+（9）Dnnn  作用：允许用户共享有限的服务回进程
+3，启动OEM服务和监听服务，并写出数据库的三种启动状态，以及各个状态之间转换的语
+
+状态：（1）加载实例：stratup nomount     （2）加载数据库：startup mount             
+      （3）打开数据库：start［open］
+转换; （1）→（2）Alter Datebase mount（2）→（3）Alter Datebase open
