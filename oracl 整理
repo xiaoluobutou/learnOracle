@@ -1,0 +1,686 @@
+启动关闭	2
+创建表空间:	2
+Select查询	2
+创建表	3
+创建同义词用for create public synonym e_s for scott.emp;	3
+创建序列	3
+B树索引：	3
+位图索引：	3
+普通索引：	4
+SQL/PL	4
+异常:	8
+函数:	8
+过程：	9
+1.	游标   cursor   四个步骤	10
+触发器：	10
+用户：	11
+逻辑备份：	11
+闪回	12
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+启动关闭
+一:
+
+shutdown normal:
+
+     不断开现在连接的用户,阻止任何用户建立新的连接，包括管理员在内。,如递交新的更新事务,直到此用户自行断开连接.这样需要等待的时间长,可以查出现连用户,再通知其自行断开.
+
+所有的用户都断开连接，数据库才进行关闭操作，即关闭数据库、卸载数据库、终止例程。在这种情况下关闭的数据库在重新启动后，不会出现问题。启动时不需要实例恢复。
+
+二:
+
+shutdown transactional
+
+     阻止任何用户建立新的连接。等待所有当前连接用户的未递交的活动事务提交完毕，然后立即断开用户的连接。所有的用户都断开连接则立即关闭数据库，进行关闭数据库、卸载数据库、终止进程等操作。这种方式,用户有可能正在算账,做复杂报表!一次数据库操作做不完的,在刚做了一次数据库操作后,将被断开,这样对用户有一定影响.启动时不需要实例恢复。
+
+三:
+
+shutdown immediate
+
+      阻止任何用户新的连接，同时限制当前连接用户开始新的事务。如果已连接用户有未完成的事务，则数据库系统不会等待他们完成，而是直接把当前未递交的事务回退。数据库系统不再等待用户主动断开连接，当未递交的事务回退成功后，系统会直接关闭、卸载数据库，并终止数据库进程。启动时不需要实例恢复。
+
+四:
+
+shutdown abort
+
+     当数据库出现故障时，可能以上三种方式都无法正常关闭数据库,则使用这种方法.强制结束当前正在执行的SQL语句;任何未递交的事务都不被回退!  这种方法基本上不会对控制文件或者参数文件造成破坏。这比强制关机要好一点(在无法正常关闭数据库的时候).启动时自动进行实例恢复。
+
+对于normal、transactional、immediate，db bUFFER cACHE的内容写入了数据文件，没有提交的事务被回滚，所有的资源被释放，数据库被“干净”的关闭。 
+对于abort，db bUFFER cACHE的内容没有写入数据文件，没有提交的事务也没有回滚。数据库没有DISMOUNT和关闭，数据文件也没有关闭。当数据库启动时，需要通过REDO LOG恢复数据，通过回滚段对事务回滚，对资源进行释放。
+
+
+关闭:
+shutdown normal 不允许新的连接、等待会话结束、等待事务结束、做一个检查点并关闭数据文件。启动时不需要实例恢复。
+Shutdown transactional  不允许新的连接、不等待会话结束、等待事务结束、做一个检查点并关闭数据文件。启动时不需要实例恢复。
+Shutdown immediate 不允许新的连接、不等待会话结束、不等待事务结束、做一个检查点并关闭数据文件。没有结束的事务是自动rollback的。启动时不需要实例恢复。
+
+Shutdown abort 不允许新的连接、不等待会话结束、不等待事务结束、不做检查点且没有关闭数据文件。启动时自动进行实例恢复。
+
+开启：
+状态：（1）加载实例：stratup nomount     （2）加载数据库：startup mount             
+      （3）打开数据库：start［open］
+改变开启状态:  alter database open
+               Alter datadase mount
+
+ 创建表空间:
+CREATE TABLESPACE data01 DATAFILE '$HOME/ORADATA/u04/data01.dbf' SIZE 2M
+EXTENT MANAGEMENT DICTIONARY;
+
+Select查询
+显示正好为 15 个字符的雇员姓名。
+Select * from emp where length(ename)=15
+找出佣金高于薪金的雇员。
+Select * from emp where comm>sal
+
+select lower('Hello World'),upper('Hello World'),initcap('hello world') from dual;
+
+select concat('Hello','World') from  dual;
+select substr('Hello World',3) from dual; 取Hello World 从第三位开始的子串
+select substr('Hello World',3，2) from dual; 取Hello World 从第三位开始的子串取2位
+
+select length('Hello World'),lengthb('Hello World')
+length求得是字符长度。  lengthb求得是字节长度。
+select instr('Hello World','ld') from dual;  求ld在Hello World中的位置
+
+
+
+创建表
+
+student1 存放在表空间user01中
+create table student1(
+ID1 int primary key,
+NAME1 varchar(10),
+SEX varchar(5),
+COURSE varchar(10),
+SCORE int
+)TABLESPACE user01
+
+创建同义词用for
+create public synonym e_s for scott.emp; 
+
+创建序列
+
+create sequence Seq_AutoID
+minvalue 1
+maxvalue 9999
+start with 1
+increment by 1
+cache 20;
+
+
+create sequence seq
+start with 8000
+increment by 1
+MAXVALUE 10000
+cache 20;
+
+Insert into QQQ(seq.nextval,’hhhh’)  此时插入的是8000
+B树索引：
+Create unique index index_name on Student(id);
+位图索引：
+Create bitmap index index_name on Student(id);
+普通索引：
+Create index index_name on Student(id);
+
+SQL/PL
+
+set serveroutput on;
+declare 
+t1 number(6);
+t2 number(6);
+begin
+t1:=&firstNumber;
+t2:=&secondNumber;
+dbms_output.put_line('Result:'||(t1+t2));
+end;
+
+declare 
+ a number:=2;
+ begin
+  a:=a+5;
+  dbms_output.put_line('和为：'||a);
+  end;
+
+declare
+  v_num number(3);
+  begin
+   select count(*) into v_num from scott.emp where deptno = '10';
+   if v_num<>0 then
+       dbms_output.put_line('10部门的人数:'||to_CHAR(v_num));
+   end if;
+   end;
+
+
+declare 
+ v_ename scott.emp.ename%type;  单列的类型
+ v_row scott.emp%rowtype;      一行的类型
+ begin
+  select ename into v_ename from scott.emp where empno = 7369;
+  dbms_output.put_line(v_ename);
+  select * into v_row from scott.emp where empno=7566;
+  dbms_output.put_line(v_row.ename||':'||v_row.sal);     这一行的哪一列
+  end;
+
+
+declare 
+  empno1 number(4):= '1110';
+  ename1 varchar2(10):='张琼';
+begin
+   update scott.emp set ename = ename1 where empno = empno1;
+   if SQL%notfound then            固定用法
+       insert into scott.emp(empno,ename) values(empno1,ename1);
+    end if;
+end;
+
+
+流程控制
+条件、分支
+
+
+
+
+
+
+
+
+declare 
+    v_age number(2);
+begin
+    v_age:= &please;
+    if(v_age>60) then
+        dbms_output.put_line('老粘人');
+    elsif(v_age>18 and v_age < 60) then
+        dbms_output.put_line('青年');
+    else
+        dbms_output.put_line('少年');
+    end if;
+end;
+
+
+accept num prompt '请输入一个数字';    //把输入的参数放到num
+declare 
+    pnum number:=&num;
+begin
+    if(pnum=0) then dbms_output.put_line('您输入的是0');
+    elsif(pnum=1) then dbms_output.put_line('您输入的是1');
+    elsif(pnum=2) then dbms_output.put_line('您输入的是2');
+    else dbms_output.put_line('其他数字');
+    end if;
+end;
+
+或者
+
+declare 
+    pnum number;
+Begin
+    pnum:=&num;
+    if(pnum=0) then dbms_output.put_line('您输入的是0');
+    elsif(pnum=1) then dbms_output.put_line('您输入的是1');
+    elsif(pnum=2) then dbms_output.put_line('您输入的是2');
+    else dbms_output.put_line('其他数字');
+    end if;
+end;
+
+
+
+
+
+
+declare
+    v_num number(2);
+begin
+    v_num:=&v_number;
+    case v_num
+        when 1 then
+            dbms_output.put_line('Monday');
+        when 2 then
+            dbms_output.put_line('Tuesday');
+        else
+            dbms_output.put_line('other');
+        end case;
+end;
+或者
+declare 
+    v_num number(2);
+begin
+    v_num:=&v_number;
+    case 
+    when v_num = 1 then dbms_output.put_line('Monday');
+    when v_num = 2 then dbms_output.put_line('Tuesday');
+    else
+    dbms_output.put_line('other');
+    end case;
+end;
+
+--流程控制：循环
+for   while    do-while
+
+declare
+ i number := 0;
+begin
+    loop
+        dbms_output.put_line(i);
+        if(i=100) then
+            exit;   /*break*/
+        end if;
+        i:=i+1;
+    end loop;
+end;
+
+
+
+
+declare 
+ i number:= 0;
+     begin
+         loop
+             dbms_output.put_line(i);
+         exit when i = 100;
+         i:=i+1;
+         end loop;
+end;
+
+While语句：
+set serveroutput on;
+declare
+i number(2):=0;
+    begin
+        while(i<101) loop
+            dbms_output.put_line(i);
+            i:=i+1;
+        end loop;
+end;
+
+For语句：
+declare
+v_num number(2);
+begin
+    for v_num in 10..100 loop
+        dbms_output.put_line(v_num);
+        end loop;
+end;
+
+
+异常:
+declare
+    v_num number(2);
+begin
+    v_num:=&v_number;
+    case v_num
+    when 1 then
+        dbms_output.put_line('Monday');
+    when 2 then
+        dbms_output.put_line('Tuesday');
+    end case;
+    exception
+        when case_not_found then
+            dbms_output.put_line('输入错误');
+end;
+
+函数:
+
+create or replace function avge(cnum in varchar)     in是入参的意思
+return number as avger number(3);
+begin
+    select avg(g) into avger from sc
+    where cno=cnum
+    group by cno;
+    return(avger);
+end avge;
+
+函数调用：
+declare
+  ab number; 
+    a number;          
+begin 
+  a:=&a;
+  ab:=avge(a);         
+dbms_output.put_line(a||'号课的平均分是：'||ab);
+end; 
+
+
+create or replace function odd_even (v1 number)
+return varchar2
+as
+    begin
+        if(mod(v1,2)=0)then
+        return 'even';
+        else return 'odd';
+        end if;
+end odd_even;
+
+
+调用：
+
+declare 
+  i number;
+  begin
+      i:=&i;
+      dbms_output.put_line(odd_even(i));
+end;
+
+或者是：
+select odd_even(6) from dual;
+
+
+
+过程：
+create or replace procedure ins_ints (v1 in number)
+ as 
+   begin 
+     for i in 1..v1 loop
+           insert into integers values(i,odd_even(i));
+end loop;
+end ins_ints;
+调用过程：
+execute ins_ints(8);
+
+带出参
+create or replace procedure se_num
+( sex in varchar2,num out number)
+
+as 
+    begin
+         if sex = '男' then
+            select count(se) into num  from se where sex= '男';
+          else
+            select count(se) into num from se where sex= '女';
+          end if;
+end;
+执行
+variable ss number;    这是在SQL命令行之间定义变量 不同于函数和其他匿名块
+exec se_num('女',:ss);     ：代表是出参
+print ss;
+
+
+1.	游标  
+cursor   四个步骤
+
+    1.声明游标
+    2.打开游标
+    3.获取数据
+    4.关闭游标
+declare 
+    cursor c is select ename from scott.emp;  声明
+    v_ename scott.emp.ename%type;
+    begin
+        open c;                         打开
+        fetch c into v_ename;             获取数据
+        while(c%found) loop               
+            dbms_output.put_line(v_ename);
+            fetch c into v_ename;
+        end loop;
+        close c;                         关闭
+end;
+
+
+触发器： 
+  
+create or replace trigger t1 before delete on scott.emp for each row    关键字：before on for
+declare
+    begin
+        dbms_output.put_line('delete');
+end;
+定义一个触发器t1在删除emp表中的任何行时会显示 ‘delete’
+
+
+create or replace trigger table1_insert  after insert on table1
+declare 
+    str char(100):= 'TRIGGER IS WORKING';
+        begin
+            dbms_output.put_LINE(str);
+end;
+触发：往table1中插入数据后会显示TRIGGER IS WORKING'
+
+
+
+create or replace trigger del_s
+    before delete on s_c for each row
+        begin
+            insert into s_c1(id,name)
+                values(:old.id,:old.name);            :old插入刚删除的
+end;
+
+用户：
+
+CREATE USER author
+	IDENTIFIED BY aaa             密码aaa
+	DEFAULT TABLESPACE USERS     默认表空间 users
+	TEMPORARY TABLESPACE TEMP   临时表空间 temp 
+	ACCOUNT UNLOCK;             
+ 注：中间没有符号
+
+权限
+
+grant CREATE ANY TABLE, CREATE ANY VIEW TO AUTHOR;       授予
+ALTER USER authoridentified by abc;  改密码
+ALTER USER AUTHORPASSWORD EXPIRE;     密码过期
+
+
+逻辑备份：
+导出命令行：EXP USERID = SCOTT/Mn123456 FULL=N BUFFER=1000 FILE=F:\SCOTT10.DMP TABLES=EMP
+数据泵导出：
+create directory dpump_dir as ‘f:\bak’;      sql里 
+Grant read,write on directory dpump_dir to <用户名>;
+Expdp scott/Mm123456 dumpfile=emp.dmp directory=dpump_dir tables=emp JOB_name = emp_job      此条为命令行
+
+
+闪回
+set time on;
+select * from aaa as of timestamp
+ to_timestamp('2011-11-29 09:36:48','YYYY-MM-DD HH24:MI:SS');
+
+
+1，写出oracle体系的物理结构及其作用
+（1）数据文件作用：创建后可改变大小
+（2）重做日志文件 作用：当数据库中的数据遭到破坏时，可以用这些日志来恢复数据库
+（3）控制文件作用：为了避免控制文件毁损导致数据库系统停止
+（4）参数作用：定义实例的启动和关闭，记录各种系统参数
+2，写出oracle体系的过程组成及作用
+（1）DBWR  作用：负责将数据块缓存如没变动过的数据块回写至硬盘内
+（2）LGWR  作用：将重做日志缓冲区的数据变动记录，循序写入重做日志文件
+（3）SMOW  作用：oracle数据库不正常关闭下一次激活时由SMOW进行数据库修复动作
+（4）PMON  作用：清除数据库缓存区内不再使用的空间并释放
+（5）CKPT  作用：确保缓冲区内经常变动的数据定期被写入数据文件
+（6）RECO  作用：自动解决在分布式事务中的故障
+（7）ARCH  作用：将归档文件写入磁盘设备
+（8）Lckn  作用：为了避免进程间在数据存入时发生冲突
+（9）Dnnn  作用：允许用户共享有限的服务回进程
+3，启动OEM服务和监听服务，并写出数据库的三种启动状态，以及各个状态之间转换的语句
+启动oem服务：set oracle-unqname=orcl；emctl start dbconsde
+在oem中启动监听服lsnrctl stral；
+状态：（1）加载实例：stratup nomount     （2）加载数据库：startup mount             
+      （3）打开数据库：start［open］
+转换; （1）→（2）Alter Datebase mount（2）→（3）Alter Datebase open
+4.用户sys以sy.sdbs身份登陆sqlplas工具，密码是aaa
+  conmet sys/aaa sydba
+5.创建sc，字段为Sno（数据类型Varchar 2（10））Lno（数据类型Varchar（10））G（数据类型Number（5））字段Sno和Cno的集合为关键字，字段为Sno Cno作为外键分别指向S表和C表的同名字段 G不能为空 表空间为mgtbs
+CREATE TABLE SC
+（Sno VARCHAR2（10））NOT NULL  Cno VARCHAR2（10） NOT NULL
+  GNUMBER（5）NOT NULL   CONSTRAINT SC1—PK PRIMARY KEY（SNO.CNO）
+     CONSTRAINT SC1—S—FK FOREIGN KEY（SNO）
+REFERENCES S（SNO）,C（CNO）；Tablespace Mgtbs；
+6.创建索引SC—I,索引字段基于SC表的cno字段
+Greate  index   SC—I  ON SC（CNO）;
+7.基于sc表的创建视图sc—avg 输出各位学生的学号（sno）和平均分（g—avg）查询该视图输出平均分（g—avg）大于70的信息，写出视图查询过程中结合后的语句
+create or replace view sc—avg（sno,g—avg）
+as select sno, avg（a） from sc group by sno;
+select * from sc—avg where g—avg＞70；
+select sno,avg（g） from  sc group  by sno  having avg（a）＞70；
+游标
+1 声明游标  declare cursor<游标名>2 打开游标  open（游标名）
+3读取游标 fetch<游标名>[into<变量名>，....n]4 关闭游标 close<游标名>
+
+函数  select  abs form dual  取绝对值    
+触发器  创建触发器 create trigger 删除触发器 drop trigger
+存储过程
+创建存储过程计算指定学生的总分
+Create or replace procedure total credit  
+       (xh in var char z)
+As       Xf number;
+Begin Select 总学分 Into xf From xsb
+ Where 学号=xh add rownum=1;
+Dbms_output,put_line(xf);End;
+用户；创建一个名称为AUTHOR的用户，口令为ANGEL默认表空间为USERS临时表空间为TEMP
+CREATE user authorIdentified by angel
+Default tablespace usersTemporary tablespace temp;
+权限；授予用户author在任何用户模式下创建表和视图的权限并允许用户author将这些权限授予给其他用户
+Grant crete any table,create any view 
+To author With admtn option;
+系统权限的收回
+Reuoke<系统权限名>form{publil |<角色名>|<用户名>[,.....n]};
+例将system方案下xsb表的查询添加修改删除数据的权限赋予用户author，使用system用户连接数据库
+Grant select insert update delect
+ On xsbTo author;
+收回用户author查询xsb表的权限
+Revoke selecton xsbfrom author；
+角色；将角色account_create 授予在任何模式中创建表和视图的权限
+Grant create any table，create an viewTo account_create;
+取消角色：account-create的create any view权限
+Revoke,create any viewFrom account-create;
+将角色account-create授予用户author
+Grant account-createTo author;
+审计：使用户author的所有更新操作都要被审计
+Audtt update table by author;
+导出：exp(恢复)  导入：imp（备份）
+命令行模式，例导出xsb表
+Exp userid=scott(用户)/Mm123456（密码） rull=n（缓冲区） buffer=1000 file=xsb.dmp（导出到前面这个文件夹） tableb=xsb（目录)
+更新数据库归档方式：
+（1） 进入命令提示符操作界面SQLPLUS/NOLOG
+(2)以SYSDBA身份和数据库相连 CONNT SLOTT/Mm12345 AS SYSDBA
+使数据库在ARCHIVELOG方式下运行
+1非归档变归档
+Sqlplus/nologConnect scott/Mm 123456 as sysdbaShutdown immediate   
+Startup mount    Alter database archivelog;           
+Archive log start;     Alter database open;
+2 归档变非归档
+Sqlplus/nologConnect scott/Mm 123456 as sysdba
+Shutdown immediate Startup mount
+Alter database no archivelog;Alter database open;
+数据泵 例：使用EXPDP导出SCOTT用户的表XSB
+CREATE DIRECTORY dpump dir as’d:\bak’;
+GRANT READ,WRITE ON DIRECIORY Dpump_DIR TO<用户名>;
+EXPDP SCOTT/Mm 123456 DUMPFILE＝XSB.DMP DIRECTORY＝DRUMP_DIR
+TABLES=XSB JOB_NAME=XSB_JOB 将学生表泵到dump
+（1）查询闪回
+语法格式：to_timestamp（‘timepoint’,‘format’）
+例：使用查询闪回恢复删除的数据。
+①set time on select＊from xsbl;
+②delete from xsbl；commit；
+③select＊from xsbl as of timestamp to_timestamp（ ）;
+④insert into xsbl；
+select＊from xsbl as of timestamp；to_timestamp（）;
+（2）表闪回
+语法格式：flashback table［用户方案名.］<表名>
+  to｛［before drop ［rename to <新表名>］］
+   [scn|timestamp]<表达式>[enable|disable]triggers }
+例：首先创建一个表，然后删除某些数据，在利用flashback table 命令恢复。
+①set time on    create table cjb1      as select*from cjb；
+②delete from cjb1     where 学号=‘151113’;   commit；
+③alter table cjb1 enable row movement ; flashback table cjb1 to timestamp
+to_timestamp（‘2015_7_6 16：54：35’，‘yyyy_mm_dd hh24：mi：ss’）；
+（3）删除闪回
+例：删除闪回的实现。
+①create table t1（t char （10））；②drop table t1；
+③select object_ name, original_ name, type, droptime from recyclebin;
+④flashback table t1 to before drop;
+在回收站中清除表table1：purgetabletable1
+（4）数据库闪回
+语法格式：flashback［standby |database<数据库名> ］
+｛
+  to[scn|timestamp]<表达式>|to before [scn| timestamp]<表达式>
+｝
+
+
+
+
+
+一．命令
+（1）显示当前目录：pwd（2）改变目录：cd
+（3）列出目录内容：dir，vdir（4）查看文本文件：cat，more
+（5）阅读文件的开头和结尾：head，tail（6）更好的文本阅读工具：less
+（7）查找文件内容：grep（8）建立目录：mkdir
+（9）建立一个空文件：touch（10）移动和重命名：mv
+（11）复制文件和目录：cp（12）删除目录和文件：rmdir，rm
+（13）改变文件所有权：chown，chgrp（14）改变文件权限;chmod
+（15）监视进程：ps（16）即时跟踪进程信息：top
+（17）向进程发送信号：kill（18）调整进程的谦让度：nice，renice
+（19）压缩：gzip（20）建立连接：in
+二、权限
+①字符权限：rwx(主人) rwx（主） nwx(其他人)
+②文件权限：r（读）w（写） x（执行）  
+③数字权限：- - -:0 - -x:1 -w-:2 -wx:3 r- -:4 r-x:5 rw-：6 rwx:7
+4r 2w 1x 0- 例：651：rw-r-x--x
+三、概念
+①输出重定向：将命令输出复制给文件而不是显示器上显示
+②输入重定向：可以将标准输入从键盘重定向到任何文本文件
+③管道：前一个命令的输出，后一个命令的输入
+④远程登录：是指本地计算机与网络上另一远程计算机取得联系，并进行程序交互，用户可以操作主机允许的任何事情
+四、简答   安装软件时会出现的情况及怎样解决
+    情况：依赖，冲突，重复安装
+    解决：依赖：#rmp-ivh nodeps gcc-12...rmp
+    冲突：#rmp-ivh firce gcc-12...rmp
+    重复安装：#rmp-ivh replace gcc-12...rmp
+1、Shell功能
+①	命令的搜索与执行②自动补完命令
+②	查阅历史纪录④I/O重定向和管道
+⑤别名功能⑥进程的前后台切换执行
+任务计算：cron  *****(分时日月星期)  */10每隔10分  
+例：1 12 15 8 *：每年8月15日12时1分
+五、设置
+①	挂载u盘：#moumt -tfat32/dev/sda1 /mnt /usb
+②	挂载光驱:#mount -t ISO9660 /dev/cdrom /home/hwd
+③	设置FTP服务器：
+安装：#apt-get install vaftpd
+安装的三种状态：
+service vsftpd startservice vsftpd stop    service vsftpd restart
+配置文件：/etc/vsftpd.conf重启:service vsftpd restart
+匿名用户登录：anonymous-enable=yes本地用户登录：locod-enable=yes
+本地用户映射：guest-username=ftp默认用户:Anon
+samba设置
+设置文件：vi /etc/samba / smb.conf
+设置内容为三部分：[global]全局设置对整体服务器
+[home] 私有用户共享用户目录 [printers]打印和共享
+[global]#workgroup=mygroup
+Server string=samba server名字
+Host allow=192.168.1.1 只允许这一台主机使用
+Guest allount=nobody(来宾帐号)
+Public=yes/guest ok=yes 允许所有用户匿名
+用户对其访问并给定了一个nobody的指定身份（为外来访问指定合法用户身份）
+Selurity=share 四个等级user server domain
+Share:所有用户无须密码帐号 user：须帐号和密码需要samba服务器
+Server：由域服务器控制   domain：由另一台域服务器控制器检查帐号密码
+[homes]：账户对根目录访问权限
+Comment=home directions
+Browseable=no 不能查看  writable=yes  可写 
+ralid users=％s  有效用户
+create mode=0664  默认的文件权限
+Directory mode=0775 默认目录权限
+[netlogon]  随便起名
+comment=network logon senice  说明文字
+共享文件夹:path=/usr/local/samba/lib/netlogon
+witable=no/readonly=yes（二选一）
+
+
+
+
